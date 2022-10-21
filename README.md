@@ -899,3 +899,450 @@ df=qs.news_data('个股',code='天瑞仪器')
 df=qs.stock_news('天瑞仪器')
 #df.head()
 ```
+
+```python
+import qstock as qs
+from qstock import plot
+```
+
+# K线图
+
+## 普通K线图
+
+- kline(df, mas=5, mal=20, notebook=True,title="股票K线图")
+
+参数说明：
+- df:数据，包含open,high,low,close,volume列名的dataframe
+- mas：短期均线，默认5日均线
+- mal：长期均线，默认20日均线
+- notebook：True代表在jupyter notebook上显示，False默认输出html，可以保存本地打开。默认为True
+- title:图形标题
+
+
+```python
+#如果notebook不显示pyecharts的图形，在前面加上以下代码(去掉前面注释)
+#from pyecharts.globals import CurrentConfig, NotebookType
+#CurrentConfig.NOTEBOOK_TYPE = NotebookType.JUPYTER_NOTEBOOK
+```
+
+
+```python
+#获取中国平安2022年至今前复权的数据
+df=qs.get_data('中国平安',start='2022-06-01',end='2022-10-20')
+#df.tail()
+```
+
+    100%|██████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00, 1000.31it/s]
+    
+
+
+```python
+#使用默认参数
+#plot.kline(df)
+```
+
+## 修正K线图
+
+- HA_kline(df)
+
+参数df与前面普通k线图线图。
+
+也叫平均K线图（Heikin-Ashi），具体原理可以参考公众号推文[《【手把手教你】使用Python对股价的Heikin Ashi蜡烛图进行可视化》](https://mp.weixin.qq.com/s?__biz=MzUyMDk1MDY2MQ==&amp;mid=2247484569&amp;idx=1&amp;sn=5e08729f109f1ed4b40323d4ffc24737&amp;chksm=f9e3c273ce944b65d5cb7ae41aa63738ae3ed41e3d0951621ced2a7b4c66cff943fab998bde1&token=292674644&lang=zh_CN#rd)。
+
+普通K线图中往往存在很多噪声，这些噪声容易掩盖市场真实趋势的随机波动，包括价格和成交量波动。比如，对市场影响持续性较短的新闻事件，以及对技术指标和市场趋势解读等，都可能造成无意义的短期价格和交易量波动，这样的噪声会对交易者分析市场产生干扰和误导。为了减少普通K线图产生的噪声，HA蜡烛图应运而生，HA中的四个价格中，HA开盘价和HA收盘价都是经过平均计算得来，平均化的处理相当于噪声消除处理，在一定程度上消除了市场的噪声，可以更加明确地反映市场价格的走势。
+
+
+```python
+#plot.HA_kline(df)
+```
+
+# 树状图
+- treemap(data, label, weight, value, color=['Green', 'Red', "#8b0000"])
+
+参数说明：
+- data：dataframe数据格式
+- label：需要展示的列名或标签名，必须是list,如[px.Constant('股票'), '行业',  '股票名称']
+    其中，'行业',  '股票名称'必须是data里的存在的列名
+- weight:data里存在的列，用来显示权重
+- value:data里存在的列，用来显示数值
+- color：设置展示的颜色
+
+
+```python
+#获取东方财富行业板块实时涨跌幅数据
+data=qs.realtime_data('行业板块')[['名称','涨幅']]
+data['权重']=abs(data['涨幅'])
+#注意去掉涨幅为0的值，否则会报错
+data=data[data['涨幅']!=0]
+params={'data':data,'label':['名称'],'weight':'权重','value':'涨幅'}
+#plot.treemap(**params)
+```
+
+
+```python
+#获取东方财富概念板块实时涨跌幅数据
+data=qs.realtime_data('概念')[['名称','涨幅']]
+data['权重']=abs(data['涨幅'])
+data=data[data['涨幅']!=0]
+params={'data':data,'label':['名称'],'weight':'权重','value':'涨幅'}
+#plot.treemap(**params)
+```
+
+# ichimoku云图
+
+- plot_ichimoku(df, t=9, k=26, l=30, s=52):
+
+参数说明：
+- df为dataframe数据，包含'open','high','low','close','volume‘列，索引为时间格式
+- t:Tenkan-sen：转折线计算周期，默认9个交易日
+- k：Kijun-sen：基准线计算周期，默认26
+- l:Chikou Span：滞后跨度或延迟线计算周期，默认30天
+- s:Senkou Span B：计算前导跨度B或先行上线B，默认52个交易日
+
+Ichimoku，是一名日本报纸作家提出的，用于衡量动量以及未来价格支撑和阻力区域的技术分析指标，目前被广泛用于判断外汇、期货、股票、黄金等投资品种的趋势和动量。关于ichimoku云图的基本原理详细以参考公众号推文：[《【手把手教你】Ichimoku云图指标可视化与交易策略回测》](https://mp.weixin.qq.com/s?__biz=MzUyMDk1MDY2MQ==&amp;mid=2247486220&amp;idx=1&amp;sn=325565ed3aa01cc1cecfed9cbe1a2ae8&amp;chksm=f9e3cde6ce9444f044c43811a4af95ba779c1b13f1ba619aa2182ba316d9ded04872f5cd3473&token=292674644&lang=zh_CN#rd)
+
+
+```python
+df=qs.get_data('丰元股份',start='2021-03-01')
+#plot.plot_ichimoku(df)
+```
+
+  
+    
+
+# 基本图形
+
+## 折线图
+- line(data=None, x=None, y=None, title=None, color=None, line_group=None, facet_col=None, legend=True):
+
+参数：data为series或dataframe的时候，可以不输入x和y。x为x坐标轴对应数据，y为y轴坐标对应数据。
+
+### 普通折线图
+
+
+```python
+#获取中国平安前复权价格数据
+code='中国平安'
+df=qs.get_data(code)
+#plot.line(df.close,title=code+'价格走势')
+```
+
+   
+
+### 股价分位点折线图
+
+- stock_line(data=None, x=None, y=None, notebook=True, title=None)
+
+参数与前面画图函数相同
+
+
+```python
+#plot.stock_line(df.close)
+```
+
+### 对比折线图
+
+
+```python
+df['ma20']=df.close.rolling(20).mean()
+title='中国平安股价与20日均线'
+#plot.line(df[['close','ma20']],title=title)
+```
+
+
+```python
+#个股资金流
+#plot.line(qs.stock_money('中国平安'),title='中国平安资金流')
+```
+
+全球指数累计涨幅可视化
+
+
+```python
+#常见的全球指数名称
+global_indexs=['sh','cyb','恒生指数','道琼斯','标普500','纳斯达克','英国富时100','法国CAC40','德国DAX30','日经225','韩国KOSPI',
+               '澳大利亚标普200','印度孟买SENSEX','台湾加权','俄罗斯RTS','加拿大S&P/TSX','巴西BOVESPA']
+index_data=qs.get_price(global_indexs,start='2012-01-01').dropna()
+#plot.line(index_data/index_data.iloc[0],title='全球指数累计涨幅(2012-2022)')
+```
+
+    
+    
+
+## 柱状图
+
+- bar(data=None, x=None, y=None, title=None, color=None, legend=False,orientation=None, log_x=False, log_y=False, barmode='group')
+
+参数说明：
+'orientation='h'表示横向柱状图,log_x和log_y为True表示使用对数坐标，
+    barmode='group'表示对比条形图,默认。为'relative'，
+    如qs.bar(dd['总市值'],log_x=True,orientation='h')。
+
+
+```python
+#计算收益率
+data=index_data.copy().dropna()
+rets=data/data.shift(1)-1
+rets=rets.to_period('Y')
+rets=(rets.groupby(rets.index).apply(lambda x: ((1+x).cumprod()-1).iloc[-1])*100).round(2)
+rets=rets.iloc[-1].sort_values(ascending=False)
+```
+
+
+```python
+title='全球指数2022年涨跌幅'
+#plot.bar(rets,title=title)
+```
+
+基于pyecharts画柱状图
+
+- chart_bar(data=None, x=None, y=None, title=None, notebook=True, zoom=False)
+
+x,y均为list，或者x为dataframe
+
+
+```python
+#plot.chart_bar(rets,title=title,zoom=True)
+```
+
+纵向柱状图
+- chart_inv_bar(data=None, x=None, y=None, title=None, notebook=True, zoom=False)
+
+x,y均为list，或者x为dataframe
+
+
+```python
+#plot.chart_inv_bar(rets,title=title,zoom=True)
+```
+
+## 散点图
+
+- scatter(data=None, x=None, y=None, title=None, color=None, size=None,trend=None, legend=True, marginal_x=None, marginal_y=None)
+
+参数说明：
+color根据不同类型显示不同颜色；
+size根据值大小显示散点图的大小；
+trend='ols'添加回归拟合线；
+marginal_x='violin',添加小提琴图；
+marginal_y= 'box'，添加箱线图。
+
+
+```python
+data=qs.get_data('晓程科技')
+#plot.scatter(data,x='close',y='volume')
+```
+
+  
+    
+
+
+```python
+data=qs.get_data('晓程科技')
+#计算收益率
+data['ret']=data.close/data.close.shift(1)-1
+data['weight']=data['ret'].abs()
+#对换手率分类
+data.loc[data.turnover_rate>20,'rr']='crazy'
+data.loc[(10<data.turnover_rate)&(data.turnover_rate<20),'rr']='high'
+data.loc[(5<data.turnover_rate)&(data.turnover_rate<10),'rr']='mid'
+data.loc[data.turnover_rate<5,'rr']='low'
+data.dropna(inplace=True)
+```
+
+    
+    
+
+
+```python
+#plot.scatter(data,x='turnover_rate',y='close',size='weight',trend='ols',marginal_x='histogram',marginal_y='box')
+```
+
+## 饼图
+
+- pie(data=None, x=None, y=None, color=None, title=None, legend=False, hole=None)
+
+data为dataframe数据，value；
+hole数值0-1，显示中间空心；
+legend=True显示图例，默认不显示。
+
+实例：个股主营业务占比可视化
+
+
+```python
+code='晓程科技'
+df=qs.main_business(code)
+c1=df['报告期']=='2022中期'
+c2=df['分类方向']=='按产品分'
+df=df[c1&c2]
+#df
+```
+
+
+```python
+#plot.pie(df.iloc[:-1],x='分类',y='营业收入(万)',title=code+'主营业务收入')
+```
+
+基于pyecharts画饼图
+
+- chart_pie(data=None, x=None, y=None, data_pair=None, title=None, notebook=True)
+
+参数与前面相同
+
+
+```python
+#plot.chart_pie(data=df.iloc[:-1],x='分类',y='营业收入(万)',title=code+'主营业务收入')
+```
+
+# 统计分布图
+
+## 直方图
+
+- hist(data=None, x=None, y=None, title=None, color=None, legend=False,orientation=None, log_x=False, log_y=False, barmode='group',
+histnorm=None)
+
+histnorm={1:'percent',2:'probability',3:'density',4:'probability density'}，其他参数与前面相同。
+
+
+```python
+#1:'percent',2:'probability',3:'density',4:'probability density'
+code='晓程科技'
+data=qs.get_data(code,fqt=2)
+#plot.hist(data,x='close',histnorm=3,title=code+'股价直方图')
+```
+
+  
+    
+
+## 概率密度图
+- hist_kde(data=None, x=None, y=None, kde=True, stat='count', figsize=(15, 7)):
+
+直方图默认统计的是观测数，可以进行统计变化，设置stat参数。
+stat可选参数：count:观测数(默认)；
+ frequency:频数;density：密度;probability:概率；
+ kde=True表示添加核密度曲线。
+ 
+ 其他参数与前面相同
+
+
+```python
+#stat可选参数：count:观测数(默认);frequency:频数;density：密度;probability:概率
+#plot.hist_kde(data.close,stat='probability')
+```
+
+## 箱线图
+- box(data=None, x=None, y=None, title=None, color=None, legend=False,orientation=None, log_x=False, log_y=False, boxmode=None)
+
+参数与前面相类似。
+
+
+```python
+index_list=['上证指数','创业板指','沪深300','道琼斯','标普500','纳斯达克']
+data=qs.get_price(index_list)
+#plot.box(data.dropna())
+```
+
+    
+    
+
+
+```python
+#获取面板数据
+dd=qs.get_data(index_list)
+plot.box(dd,x='name',y='close',color='name')
+```
+
+    
+
+```python
+#plot.box(dd,y='name',x='close',color='name',orientation='h')
+```
+
+## 小提琴图
+- violin(data=None, x=None, y=None, title=None, color=None, legend=False,orientation=None, log_x=False, log_y=False, box=False, points=None)
+
+
+```python
+#plot.violin(dd,x='name',y='close',color='name',box=True)
+```
+
+小提琴是是箱线图和核密度图的集合，通过箱线思维展示数据的各个百分位点。小提琴图上的核密度图展示了数据分布的形状，分布越宽的位置表示数据越集中于该处，反之则说明该处数据分布越少。
+
+
+```python
+#plot.violin(dd,y='name',x='close',color='name',box=True,orientation='h')
+```
+
+
+```python
+#plot.violin(dd.query('name=="上证指数"'),y='name',x='close',box=True,orientation='h')
+```
+
+
+```python
+#plot.violin(dd.query('name=="道琼斯"'),y='name',x='close',box=True,orientation='h')
+```
+
+# 热力图
+
+- chart_heatmap(x, y, v, title=None, notebook=True)
+
+
+```python
+sh0=qs.get_data('上证指数').close['2011':'2021']
+sh=(sh0/sh0.shift(1)-1).to_period('M')
+sh=sh.groupby(sh.index).apply(lambda x: ((((1+x).cumprod()-1).iloc[-1])*100).round(2))
+```
+
+    
+
+
+```python
+x=[str(i) for i in range(2011,2022)]
+y=[str(i)+'月' for i in range(1,13)]
+v= [[i,j,sh[str(2011+i)+'-'+str(1+j)]] for i in range(11) for j in range(12)]
+#plot.chart_heatmap(x,y,v,title='上证指数月度收益率')
+```
+
+
+```python
+#plot.chart_heatmap_color(x,y,v,title='上证综指月度收益率')
+```
+
+# 地图
+
+- chart_map(data=None, x=None, y=None, data_pair=None, title=None, notebook=True)
+
+
+```python
+df=qs.realtime_data('地域')
+df['名称']=df['名称'].apply(lambda s:s[:-2] if s.endswith('板块') else s)
+#df.head()
+```
+
+
+```python
+#地域板块最新价格指数
+#plot.chart_map(df,x='名称',y='最新')
+```
+
+# 词云图
+
+
+```python
+#txt=qs.news_data('cctv',start='20221020',end='20221021')
+```
+
+
+```python
+#缺失值处理，转为str格式
+txt_list=''.join(list(txt.content.apply(lambda s:str(s))))
+```
+
+
+```python
+#使用jieba处理分词并转为词云格式数据
+c_data=plot.cloud_data(txt_list)
+#画词云图
+#plot.chart_wordcloud(c_data)
+```
+
