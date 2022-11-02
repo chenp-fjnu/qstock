@@ -189,33 +189,7 @@ def MR_Strategy(df,lookback=20,buy_threshold=-1.5,sell_threshold=1.5,cost=0.0):
     sell_threshold:卖出参数，均值向上偏离标准差的倍数，默认1.5
     cost为手续费+滑点价差，可以根据需要进行设置，默认为0.0
     '''
-    #计算均值回归策略的score值
-    ret_lb=df.rets.rolling(lookback).mean()
-    std_lb=df.rets.rolling(lookback).std()
-    df['score']=(df.rets-ret_lb)/std_lb
-    df.fillna(0,inplace=True)
-    #设计买卖信号，为尽量贴近实际，加入涨跌停不能买卖的限制
-    #当score值小于-1.5且第二天开盘没有涨停发出买入信号设置为1
-    df.loc[(df.score<buy_threshold) &(df['open'] < df['close'].shift(1) * 1.097), 'signal'] = 1
-    #当score值大于1.5且第二天开盘没有跌停发出卖入信号设置为0
-    df.loc[(df.score>sell_threshold) &(df['open'] > df['close'].shift(1) * 0.903), 'signal'] = 0
-    df['position']=df['signal'].shift(1)
-    df['position'].fillna(method='ffill',inplace=True)
-    df['position'].fillna(0,inplace=True)
-    #根据交易信号和仓位计算策略的每日收益率
-    df.loc[df.index[0], 'capital_ret'] = 0
-    #今天开盘新买入的position在今天的涨幅(扣除手续费)
-    df.loc[df['position'] > df['position'].shift(1), 'capital_ret'] = \
-                         (df['close'] / df['open']-1) * (1- cost) 
-    #卖出同理
-    df.loc[df['position'] < df['position'].shift(1), 'capital_ret'] = \
-                   (df['open'] / df['close'].shift(1)-1) * (1-cost) 
-    # 当仓位不变时,当天的capital是当天的change * position
-    df.loc[df['position'] == df['position'].shift(1), 'capital_ret'] = \
-                        df['rets'] * df['position']
-    #计算策略累计收益率
-    df['capital_line']=(df.capital_ret+1.0).cumprod()
-    return df
+    print('完整代码见知识星球')
 
 def North_Strategy(data,window=252,stdev_n=1.5,cost=0.00):
     '''输入参数：
@@ -224,66 +198,8 @@ def North_Strategy(data,window=252,stdev_n=1.5,cost=0.00):
     stdev_n:几倍标准差
     cost:手续费
     '''
-    # 中轨
-    df=data.copy().fillna(0)
-    df['mid'] = df['北向资金'].rolling(window).mean()
-    stdev = df['北向资金'].rolling(window).std()
-    # 上下轨
-    df['upper'] = df['mid'] + stdev_n * stdev
-    df['lower'] = df['mid'] - stdev_n * stdev
-    df['ret']=df.close/df.close.shift(1)-1
-    df.fillna(0,inplace=True)
-   
-    #设计买卖信号
-    #当日北向资金突破上轨线发出买入信号设置为1
-    df.loc[df['北向资金']>df.upper, 'signal'] = 1
-    #当日北向资金跌破下轨线发出卖出信号设置为0
-    df.loc[df['北向资金']<df.lower, 'signal'] = 0
-    df['position']=df['signal'].shift(1)
-    df['position'].fillna(method='ffill',inplace=True)
-    df['position'].fillna(0,inplace=True)
-    #根据交易信号和仓位计算策略的每日收益率
-    df.loc[df.index[0], 'capital_ret'] = 0
-    #今天开盘新买入的position在今天的涨幅(扣除手续费)
-    df.loc[df['position'] > df['position'].shift(1), 'capital_ret'] = \
-                         (df.close/ df.open-1) * (1- cost) 
-    #卖出同理
-    df.loc[df['position'] < df['position'].shift(1), 'capital_ret'] = \
-                   (df.open / df.close.shift(1)-1) * (1-cost) 
-    # 当仓位不变时,当天的capital是当天的change * position
-    df.loc[df['position'] == df['position'].shift(1), 'capital_ret'] = \
-                        df['ret'] * df['position']
-    #计算策略累计收益率
-    df['capital_line']=(df.capital_ret+1.0).cumprod()
-    return df
+    print('完整代码见知识星球')
 
 #海龟交易法则指数择时简单版回测
 def TT_strategy(data,n1=20,n2=10):
-    df=data.copy()
-    #最近N1个交易日最高价
-    df['H_N1']=df.high.rolling(n1).max()
-    #最近N2个交易日最低价
-    df['L_N2']=df.low.rolling(n2).max()
-    #当日收盘价>昨天最近N1个交易日最高点时发出信号设置为1
-    buy_index=df[df.close>df['H_N1'].shift(1)].index
-    df.loc[buy_index,'signal']=1
-    #将当日收盘价<昨天最近N2个交易日的最低点时收盘信号设置为0
-    sell_index=df[df.close<df['L_N2'].shift(1)].index
-    df.loc[sell_index,'signal']=0
-    df['position']=df['signal'].shift(1)
-    df['position'].fillna(method='ffill',inplace=True)
-    d=df[df['position']==1].index[0]-timedelta(days=1)
-    df1=df.loc[d:].copy()
-    df1['position'][0]=0
-    #当仓位为1时，买入持仓，当仓位为0时，空仓，计算资金净值
-    df1['capital_ret']=df1.rets.values*df1['position'].values
-    #计算策略累计收益率
-    df1['capital_line']=(df1.capital_ret+1.0).cumprod()
-    return df1
-
-
-
-
-
-
-
+    print('完整代码见知识星球')
