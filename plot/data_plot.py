@@ -1,12 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: UTF-8 -*-
-"""
-@Project ：python_project
-@File    ：data_plot.py
-@IDE     ：PyCharm
-@Author  ：Jinyi Zhang
-@Date    ：2022/9/29 21:00
-"""
 # 先引入后面可能用到的包（package）
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -19,6 +10,8 @@ mpl.rcParams['axes.unicode_minus'] = False
 
 # 对plotly的封装
 import plotly.express as px
+import plotly
+plotly.offline.init_notebook_mode(connected=True)
 import warnings
 
 from qstock.data.money import stock_money
@@ -29,7 +22,8 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 # 常用图表
 
 # 画线图line
-def line(data=None, x=None, y=None, title=None, color=None, line_group=None, facet_col=None, legend=True):
+def line(data=None, x=None, y=None, title=None, color=None, line_group=None, 
+         facet_col=None, legend=True,notebook=True):
     """画折线图
     data为series或dataframe的时候，可以不输入x和y
     """
@@ -43,12 +37,16 @@ def line(data=None, x=None, y=None, title=None, color=None, line_group=None, fac
             'x': 0.5,
             'xanchor': 'center',  # 相对位置
             'yanchor': 'top'})
-    fig.show()
+    if notebook:
+        return fig.show()
+    else:
+        return plotly.offline.plot(fig)
 
 
 # 画散点图scatter
 def scatter(data=None, x=None, y=None, title=None, color=None, size=None,
-            trend=None, legend=True, marginal_x=None, marginal_y=None):
+            trend=None, legend=True, marginal_x=None, marginal_y=None,
+            notebook=True):
     '''color根据不同类型显示不同颜色
     size根据值大小显示散点图的大小
     trend='ols'添加回归拟合线
@@ -66,11 +64,15 @@ def scatter(data=None, x=None, y=None, title=None, color=None, size=None,
             'x': 0.5,
             'xanchor': 'center',  # 相对位置
             'yanchor': 'top'})
-    fig.show()
+    if notebook:
+        return fig.show()
+    else:
+        return plotly.offline.plot(fig)
 
 
 # 画饼图pie
-def pie(data=None, x=None, y=None, color=None, title=None, legend=False, hole=None):
+def pie(data=None, x=None, y=None, color=None, title=None, 
+        legend=False, hole=None,notebook=True):
     '''data为dataframe数据，value
     hole数值0-1，显示中间空心
     legend=True显示图例，默认不显示
@@ -85,12 +87,16 @@ def pie(data=None, x=None, y=None, color=None, title=None, legend=False, hole=No
             'x': 0.5,
             'xanchor': 'center',  # 相对位置
             'yanchor': 'top'})
-    fig.show()
+    if notebook:
+        return fig.show()
+    else:
+        return plotly.offline.plot(fig)
 
 
 # 画柱状图
 def bar(data=None, x=None, y=None, title=None, color=None, legend=False,
-        orientation=None, log_x=False, log_y=False, barmode='group'):
+        orientation=None, log_x=False, log_y=False, barmode='group',
+        notebook=True):
     '''orientation='h'表示横向柱状图,log_x和log_y为True表示使用对数坐标
     barmode='group'表示对比条形图,默认。为'relative'
     如qs.bar(dd['总市值'],log_x=True,orientation='h')
@@ -106,12 +112,16 @@ def bar(data=None, x=None, y=None, title=None, color=None, legend=False,
             'x': 0.5,
             'xanchor': 'center',  # 相对位置
             'yanchor': 'top'})
-    fig.show()
+    if notebook:
+        return fig.show()
+    else:
+        return plotly.offline.plot(fig)
 
 
 # 箱线图
 def box(data=None, x=None, y=None, title=None, color=None, legend=False,
-        orientation=None, log_x=False, log_y=False, boxmode=None):
+        orientation=None, log_x=False, log_y=False, boxmode=None,
+        notebook=True):
     fig = px.box(data_frame=data, x=x, y=y, color=color, title=title,
                  orientation=orientation, log_x=log_x, log_y=log_y, boxmode=boxmode)
     fig.update_layout(showlegend=legend)
@@ -122,12 +132,16 @@ def box(data=None, x=None, y=None, title=None, color=None, legend=False,
             'x': 0.5,
             'xanchor': 'center',  # 相对位置
             'yanchor': 'top'})
-    fig.show()
+    if notebook:
+        return fig.show()
+    else:
+        return plotly.offline.plot(fig)
 
 
 # 小提琴图（Violin）
 def violin(data=None, x=None, y=None, title=None, color=None, legend=False,
-           orientation=None, log_x=False, log_y=False, box=False, points=None):
+           orientation=None, log_x=False, log_y=False, box=False, points=None
+           ,notebook=True):
     fig = px.violin(data_frame=data, x=x, y=y, color=color, title=title,
                     orientation=orientation, log_x=log_x, log_y=log_y, box=box,
                     points=points)
@@ -139,13 +153,16 @@ def violin(data=None, x=None, y=None, title=None, color=None, legend=False,
             'x': 0.5,
             'xanchor': 'center',  # 相对位置
             'yanchor': 'top'})
-    fig.show()
+    if notebook:
+        return fig.show()
+    else:
+        return plotly.offline.plot(fig)
 
 
 # 直方图histogram
 def hist(data=None, x=None, y=None, title=None, color=None, legend=False,
          orientation=None, log_x=False, log_y=False, barmode='group',
-         histnorm=None):
+         histnorm=None,notebook=True):
     '''histnorm={1:'percent',2:'probability',3:'density',4:'probability density'}
     '''
     hists = {1: 'percent', 2: 'probability', 3: 'density', 4: 'probability density'}
@@ -162,11 +179,15 @@ def hist(data=None, x=None, y=None, title=None, color=None, legend=False,
             'x': 0.5,
             'xanchor': 'center',  # 相对位置
             'yanchor': 'top'})
-    fig.show()
+    if notebook:
+        return fig.show()
+    else:
+        return plotly.offline.plot(fig)
 
 
 # seaborn统计分布图
-def hist_kde(data=None, x=None, y=None, kde=True, stat='count', figsize=(15, 7)):
+def hist_kde(data=None, x=None, y=None, kde=True, stat='count', 
+             figsize=(15, 7)):
     '''
     直方图默认统计的是观测数，可以进行统计变化，设置stat参数。
     stat可选参数：count:观测数(默认)
@@ -179,7 +200,8 @@ def hist_kde(data=None, x=None, y=None, kde=True, stat='count', figsize=(15, 7))
 
 
 # 画矩形树图
-def treemap(data, label, weight, value, color=['Green', 'Red', "#8b0000"]):
+def treemap(data, label, weight, value, color=['Green', 'Red', "#8b0000"],
+            notebook=True):
     '''data：dataframe数据格式
     label：需要展示的列名或标签名，必须是list,如[px.Constant('股票'), '行业',  '股票名称']
     其中，'行业',  '股票名称'必须是data里的存在的列名
@@ -193,7 +215,10 @@ def treemap(data, label, weight, value, color=['Green', 'Red', "#8b0000"]):
                       selector=dict(type='treemap'))
     fig.update_layout(margin=dict(t=30, l=10, r=10, b=10))
     fig.update(layout_coloraxis_showscale=False)
-    fig.show()
+    if notebook:
+        return fig.show()
+    else:
+        return plotly.offline.plot(fig)
 
 
 #####################################################################################
