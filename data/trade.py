@@ -12,7 +12,6 @@ import requests
 import pandas as pd
 import multitasking
 from tqdm import tqdm
-from retry import retry
 
 from jsonpath import jsonpath
 from datetime import datetime, timedelta
@@ -288,7 +287,6 @@ def stock_snapshot(code):
 
 
 # 获取最近n日（最多五天）的1分钟数据
-@retry(tries=3)
 def get_1min_data(code, n=5):
     """
     获取股票、期货、债券的最近n日的1分钟K线行情
@@ -516,26 +514,35 @@ def latest_trade_date():
     
 
 # 获取单只或多只证券（股票、基金、债券、期货)的收盘价格dataframe
-def get_price(code_list, start='19000101', end='20500101', freq='d', fqt=1):
+def get_price(code_list, start='19000101', end=None, freq='d', fqt=1):
     '''code_list输入股票list列表
     如code_list=['中国平安','贵州茅台','工业富联']
     '''
     if isinstance(code_list, str):
         code_list = [code_list]
+    
+    if end is None:
+        end=latest_trade_date()
 
     @multitasking.task
-    @retry(tries=3, delay=1)
     def run(code):
-        temp = web_data(code, start, end, freq, fqt)
-        name = temp.name.iloc[-1]
-        data[name] = temp.close
+        try:
+            temp = web_data(code, start, end, freq, fqt)
+            temp[temp.name[0]]=temp.close
+            data_list.append(temp[temp.name[0]])
+        except:
+            pass
 
-    data = pd.DataFrame()
+    data_list = []
     for code in tqdm(code_list):
-        run(code)
+        try:
+            run(code)
+        except:
+            continue
     multitasking.wait_for_tasks()
-
-    return data
+    # 转换为dataframe
+    df = pd.concat(data_list, axis=1)
+    return df
 
 # 获取单只或多只证券（股票、基金、债券、期货)的历史K线数据
 def get_data(code_list, start='19000101', end=None, freq='d', fqt=1):
@@ -551,7 +558,6 @@ def get_data(code_list, start='19000101', end=None, freq='d', fqt=1):
     data_list = []
 
     @multitasking.task
-    @retry(tries=3, delay=1)
     def run(code):
         data = web_data(code, start, end, freq, fqt)
         data_list.append(data)
@@ -617,11 +623,6 @@ def stock_basics(code_list):
     cols = ['代码', '名称', '所处行业']
     df = trans_num(df, cols)
     return df
-
-
-
-
-
 
 # 获取沪深市场全部股票报告期信息
 def report_date():
@@ -871,7 +872,71 @@ def stock_billboard(start=None, end=None):
     s = s1 | s2 | s3
     df = df[-(s)]
     return df
+#获取沪深指数对应代码名称字典
+def index_code_name():
+    df=realtime_data('沪深指数')
+    code_name_dict=dict((df[['代码','名称']].values))
+    return code_name_dict
 
+#获取指数历史交易数据
+def get_index_data(code_list, start='19000101', end=None, freq='d'):
+    
+    if isinstance(code_list, str):
+        code_list = [code_list]
+    if end is None:
+        end=latest_trade_date()
+
+    data_list = []
+
+    @multitasking.task
+    def run(code):
+        data = web_data(code, start=start, end=end, freq=freq)
+        data_list.append(data)
+
+    for code in tqdm(code_list):
+        if code.isdigit():
+            code_name_dict=index_code_name()
+            code=code_name_dict[code]
+        run(code)
+    multitasking.wait_for_tasks()
+    # 转换为dataframe
+    df = pd.concat(data_list, axis=0)
+    return df
+
+# 获取指数价格数据
+def get_index_price(code_list, start='19000101', end=None, freq='d'):
+    '''code_list输入指数list列表
+   
+    '''
+    
+    if isinstance(code_list, str):
+        code_list = [code_list]
+    
+    if end is None:
+        end=latest_trade_date()
+
+    @multitasking.task
+    def run(code):
+        try:
+            temp = web_data(code, start, end, freq)
+            temp[temp.name[0]]=temp.close
+            data_list.append(temp[temp.name[0]])
+        except:
+            pass
+
+    data_list = []
+    for code in tqdm(code_list):
+        if code.isdigit():
+            code_name_dict=index_code_name()
+            code=code_name_dict[code]
+        try:
+            run(code)
+        except:
+            continue
+    multitasking.wait_for_tasks()
+    # 转换为dataframe
+    df = pd.concat(data_list, axis=1)
+    return df
 
 # 获取股票所属板块
 def stock_sector(code):
@@ -925,7 +990,6 @@ fund_header = {
 
 
 # 获取基金单位净值（当前净资产大小）和累计净值（自成立以来的整体收益情况）
-@retry(tries=3)
 def fund_data_single(code):
     """
     根据基金代码和要获取的页码抓取基金净值信息
@@ -985,7 +1049,6 @@ def fund_price(code_list):
     '''
 
     @multitasking.task
-    @retry(tries=3, delay=1)
     def run(code):
         temp = fund_data_single(code)
         data[code] = temp['累计净值']
@@ -1009,7 +1072,6 @@ def fund_data(code_list):
     data_list = []
 
     @multitasking.task
-    @retry(tries=3, delay=1)
     def run(code):
         data = fund_data_single(code)
         data['code'] = code
@@ -1022,8 +1084,6 @@ def fund_data(code_list):
     df = pd.concat(data_list, axis=0)
     return df
 
-
-@retry(tries=3)
 def fund_code(ft=None):
     """
     获取天天基金网公开的全部公墓基金名单
@@ -1070,8 +1130,6 @@ def fund_code(ft=None):
     df = pd.DataFrame(results, columns=columns)
     return df
 
-
-@retry(tries=3)
 def fund_position(code, n=1):
     '''code:基金代码，n:获取最近n期数据，n默认为1表示最近一期数据
     '''
@@ -1142,8 +1200,6 @@ def fund_dates(code):
         return []
     return json_response['Datas']
 
-
-@retry(tries=3)
 def fund_perfmance(code):
     """
     获取基金阶段涨跌幅度
@@ -1190,8 +1246,6 @@ def fund_perfmance(code):
     df = trans_num(df, ignore_cols)
     return df
 
-
-@retry(tries=3)
 def fund_base_info(code):
     """
     获取基金的一些基本信息
@@ -1243,7 +1297,6 @@ def fund_info(code=None, ft='gp'):
     ss = []
 
     @multitasking.task
-    @retry(tries=3, delay=1)
     def start(code):
         s = fund_base_info(code)
         ss.append(s)
@@ -1334,7 +1387,6 @@ def bond_info_all():
 
     df = pd.concat(dfs, ignore_index=True)
     return df
-
 
 def bond_info(code_list=None):
     """
