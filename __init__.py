@@ -5,10 +5,10 @@
 @Date    ：2022/9/29 20:20 
 '''
 #基础模块
-#from qstock.base import send_wechat
+from qstock.base import send_wechat
 
 #数据模块
-#from qstock.web_data.util import *
+from qstock.web_data.util import *
 #股票、债券、期货、基金等交易行情数据
 from qstock.data.trade import *
 
@@ -24,12 +24,12 @@ from qstock.data.money import *
 from qstock.data.macro import *
 
 #可视化模块
-#from qstock.plot.data_plot import *
-#from qstock.plot.chart_plot import *
+from qstock.plot.data_plot import *
+from qstock.plot.chart_plot import *
 
 #选股模块
-#from qstock.stock.stock_pool import *
-#from qstock.stock.ths_em_pool import *
+from qstock.stock.stock_pool import *
+from qstock.stock.ths_em_pool import *
 
 #回测模块
-#from qstock.backtest.vec_backtest import *
+from qstock.backtest.vec_backtest import *
