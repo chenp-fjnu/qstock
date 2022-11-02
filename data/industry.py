@@ -46,14 +46,26 @@ def ths_index_member(code=None):
         return ths_concept_member(code)
 
 def ths_index_price(flag='概念'):
-    df=pd.DataFrame()
-    names=ths_index_name(flag)
-    for name in names:
+    @multitasking.task
+    def run(code):
         try:
-            df[name]=ths_index_data(name).close
+            temp=ths_index_data(code)
+            temp[code]=temp.close
+            df_list.append(temp[code])
+        except:
+            pass
+    
+    df_list=[]
+    codes=ths_index_name(flag)
+    for code in tqdm(codes):
+        try:
+            run(code)
         except:
             continue
-    return df
+    multitasking.wait_for_tasks()
+    # 转换为dataframe
+    df = pd.concat(df_list, axis=1)
+    return df.iloc[-300:].dropna(axis=1)
 
 #概念指数行情数据
 def ths_index_data(code=None):
