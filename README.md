@@ -1,11 +1,16 @@
 # 简介
 
 qstock由“Python金融量化”公众号开发，试图打造成个人量化投研分析开源库，目前包括数据获取（data）、可视化(plot)、选股(stock)和量化回测（backtest）四个模块。其中数据模块（data）数据来源于东方财富网、同花顺、新浪财经等网上公开数据，数据爬虫部分参考了现有金融数据包tushare、akshare和efinance。qstock致力于为用户提供更加简洁和规整化的金融市场数据接口。可视化模块基于plotly.express和pyecharts包，为用户提供基于web的交互图形简单操作接口；选股模块提供了同花顺的技术选股和公众号策略选股，包括RPS、MM趋势、财务指标、资金流模型等，回测模块为大家提供向量化（基于pandas）和基于事件驱动的基本框架和模型。
-qstock目前在pypi官网上发布，开源版本为1.1.0，意味着读者直接“pip install qstock ”安装即可使用。GitHub地址：https://github.com/tkfy920/qstock。
 
-目前部分策略选股和策略回测功能仅供知识星球会员使用，会员可在知识星球置顶帖子上上获取qstock-1.1.1.tar.gz （强化版）安装包，进行离线安装。
+qstock目前在pypi官网上发布，最早开源版本为1.1.0，目前更新至1.2.0版本
 
-下面为大家介绍qstock数据模块（data）各函数的具体调用方式和应用举例。
+读者直接在cmd或anaconda prompt上输入“pip install qstock ”进行安装，或输入“pip install -upgrade qstock”进行更新。
+
+GitHub地址：https://github.com/tkfy920/qstock。
+
+目前部分策略选股和策略回测功能仅供知识星球会员使用，会员可在知识星球置顶帖子上上获取qstock-1.2.1.tar.gz （强化版）安装包，进行离线安装（将离线安装包放置在工作路径上使用'pip install qstock-1.2.1.tar.gz' 进行安装）。
+
+下面为大家介绍qstock各模块的具体调用方式和应用举例。
 
 
 ```python
@@ -13,6 +18,7 @@ qstock目前在pypi官网上发布，开源版本为1.1.0，意味着读者直�
 import qstock as qs
 ```
 
+# 数据模块
 # 行情交易数据接口
 
 ## 实时行情数据
