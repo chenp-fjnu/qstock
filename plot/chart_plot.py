@@ -174,7 +174,7 @@ def kline(df, mas=5, mal=20, notebook=True,title="股票K线图"):
     if notebook:
         return grid.render_notebook()
     else:
-        return grid
+        return grid.render('kline.html')
 
 
 # 股价折线图+不同颜色显示分位数点位
@@ -236,7 +236,7 @@ def stock_line(data=None, x=None, y=None, notebook=True, title=None):
     if notebook:
         return g.render_notebook()
     else:
-        return g
+        return g.render('stockline.html')
 
 
 # 画线图
@@ -272,7 +272,7 @@ def chart_line(data=None, x=None, y=None, title=None, notebook=True, zoom=False)
     if notebook:
         return g.render_notebook()
     else:
-        return g
+        return g.render('line.html')
 
 
 # 画柱状图
@@ -302,7 +302,7 @@ def chart_bar(data=None, x=None, y=None, title=None, notebook=True, zoom=False):
     if notebook:
         return g.render_notebook()
     else:
-        return g
+        return g.render('bar.html')
 
 
 # 画纵向柱状图
@@ -343,7 +343,7 @@ def chart_inv_bar(data=None, x=None, y=None, title=None, notebook=True, zoom=Fal
     if notebook:
         return g.render_notebook()
     else:
-        return g
+        return g.render('bar.html')
 
 
 # 饼图
@@ -377,7 +377,7 @@ def chart_pie(data=None, x=None, y=None, data_pair=None, title=None, notebook=Tr
     if notebook:
         return g.render_notebook()
     else:
-        return g
+        return g.render('pie.html')
 
 
 # 热力图
@@ -392,7 +392,7 @@ def chart_heatmap(x, y, v, title=None, notebook=True):
     if notebook:
         return g.render_notebook()
     else:
-        return g
+        return g.render('heatmap.html')
 
 
 # 热力图改变颜色
@@ -414,7 +414,7 @@ def chart_heatmap_color(x, y, value, v1=0.0, v2=1.0, v3=3.0, title=None, noteboo
     if notebook:
         return g.render_notebook()
     else:
-        return g
+        return g.render('heatmap2.html')
 
 
 # 画地图
@@ -446,8 +446,7 @@ def chart_map(data=None, x=None, y=None, data_pair=None, title=None, notebook=Tr
     if notebook:
         return g.render_notebook()
     else:
-        return g
-
+        return g.render('map.html')
 
 # 文本分词
 def cut_word(data, stopword='stopwords.txt'):
@@ -485,7 +484,7 @@ def chart_wordcloud(data, title=None, notebook=True):
     if notebook:
         return g.render_notebook()
     else:
-        return g
+        return g.render('wordcloud.html')
 
 
 # 日历图
@@ -508,7 +507,7 @@ def chart_calendar(data, title=None, notebook=True):
     if notebook:
         return g.render_notebook()
     else:
-        return g
+        return g.render('calendar.html')
 
 
 # 箱线图
@@ -522,7 +521,7 @@ def chart_box(df, title=None, notebook=True):
     if notebook:
         return g.render_notebook()
     else:
-        return g
+        return g.render('box.html')
 
 
 
