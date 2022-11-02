@@ -536,6 +536,16 @@ def stock_yjkb(date= None):
     res = requests.get(url, params=params)
     data_json = res.json()
     page_num = data_json["result"]["pages"]
+    old_cols=["序号","代码","简称","板块", "_","类型","_","公告日","_",
+            "每股收益","营业收入","营业收入去年同期","净利润","净利润去年同期",
+            "每股净资产","净资产收益率","营业收入同比","净利润同比",
+            "营业收入季度环比","净利润季度环比","行业","_","_","_","_","_",
+            "_","_","_",]
+    new_cols= ["代码","简称","每股收益","营业收入", "营业收入去年同期", 
+                   "营业收入同比","营业收入季度环比","净利润","净利润去年同期", 
+                   "净利润同比","净利润季度环比","每股净资产","净资产收益率",
+                   "行业","公告日","板块","类型",]
+    
     if page_num > 1:
         df = pd.DataFrame()
         for page in tqdm(range(1, page_num + 1), leave=True):
@@ -555,16 +565,8 @@ def stock_yjkb(date= None):
             temp_df.reset_index(inplace=True)
             temp_df["index"] = range(1, len(temp_df) + 1)
             df = pd.concat([df, temp_df], ignore_index=True)
-        old_cols=["序号","代码","简称","板块", "_","类型","_","公告日","_",
-            "每股收益","营业收入","营业收入去年同期","净利润","净利润去年同期",
-            "每股净资产","净资产收益率","营业收入同比","净利润同比增长",
-            "营业收入季度环比","净利润季度环比","行业","_","_","_","_","_",
-            "_","_","_",]
+        
         df.columns = old_cols
-        new_cols= ["代码","简称","每股收益","营业收入", "营业收入去年同期", 
-                   "营业收入同比","营业收入季度环比","净利润","净利润去年同期", 
-                   "净利润同比","净利润季度环比","每股净资产","净资产收益率",
-                   "行业","公告日","板块","类型",]
         df = df[new_cols]
         return df
     df2 = pd.DataFrame(data_json["result"]["data"])
