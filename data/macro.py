@@ -49,7 +49,9 @@ def ib_rate(market='sh',fc=None):
             df=pd.merge(df,temp,how='outer')
         except:
             continue
-    return df.sort_values('报告日')
+    df= df.sort_values('报告日')
+    df.reset_index(inplace=True, drop=True)
+    return df
 
 def interbank_rate(market,fc,indicator):
     """
@@ -187,9 +189,7 @@ def macro_data(flag=None):
     elif flag=='ppi':
         return ppi()
     elif flag=='pmi':
-        return ms()
-    elif flag=='pmi':
-        return cpi()
+        return pmi()
     else:
         return gdp()
 
