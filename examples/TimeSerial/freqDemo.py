@@ -83,4 +83,6 @@ print(ts.resample('AS').sum().to_period('A'))
 print(ts.resample('Q').sum().to_period('Q'))
 #根据groupby进行resampling
 #按月进行汇总求平均值
-print(ts.groupby(lambda x: x.year).sum())
+print(ts.groupby(lambda x: x.year).mean())
+#按周进行汇总求平均值
+print(ts.groupby(lambda x: x.weekday).mean())
